@@ -1,5 +1,7 @@
 package com.gmurari.pokemon.data.di
 
+import com.gmurari.pokemon.data.local.PokemonLocalService
+import com.gmurari.pokemon.data.local.impl.PokemonLocalServiceImpl
 import com.gmurari.pokemon.data.remote.PokemonRemoteService
 import com.gmurari.pokemon.data.remote.impl.PokemonRemoteServiceImpl
 import dagger.Binds
@@ -25,9 +27,16 @@ internal abstract class Singleton {
     abstract fun provideMessageRepository(repository: PokemonRepositoryImpl): PokemonRepository
 
     /**
-     * Provide the implementation of [PokemonRemoteServiceImpl].
+     * Provide the implementation of [PokemonRemoteService].
      */
     @Binds
     @Singleton
     abstract fun providePokemonRemoteService(service: PokemonRemoteServiceImpl): PokemonRemoteService
+
+    /**
+     * Provide the implementation of [PokemonLocalService].
+     */
+    @Binds
+    @Singleton
+    abstract fun providePokemonLocalService(service: PokemonLocalServiceImpl): PokemonLocalService
 }

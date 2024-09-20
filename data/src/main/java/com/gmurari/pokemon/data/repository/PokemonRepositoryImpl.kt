@@ -1,7 +1,6 @@
 package com.gmurari.pokemon.data.repository
 
-import androidx.room.withTransaction
-import com.gmurari.pokemon.data.local.PokemonDatabase
+import com.gmurari.pokemon.data.local.PokemonLocalService
 import com.gmurari.pokemon.data.remote.PokemonRemoteService
 import com.gmurari.pokemon.data.util.percentOf
 import com.gmurari.pokemon.domain.model.Pokemon
@@ -19,22 +18,20 @@ import javax.inject.Singleton
 
 @Singleton
 internal class PokemonRepositoryImpl @Inject constructor(
-    private val pokemonDatabase: PokemonDatabase,
-    private val pokemonRemoteService: PokemonRemoteService
+    private val pokemonRemoteService: PokemonRemoteService,
+    private val pokemonLocalService: PokemonLocalService
 ): PokemonRepository {
 
     override fun getPokemonList(
         searchString: String,
         limit: Int,
         offset: Int
-    ): Flow<List<Pokemon>> =
-
-        pokemonDatabase.dao.getPokemonList(searchString, offset, limit).map { list ->
+    ): Flow<List<Pokemon>> = pokemonLocalService.getPokemonList(searchString, offset, limit)
+        .map { list ->
             list.map {
                 it.toPokemon()
             }
         }
-
 
     /**
      * Download the list of Pokemon from the API and save it to the database.
@@ -52,11 +49,7 @@ internal class PokemonRepositoryImpl @Inject constructor(
 
             val pokemonList = pokemonRemoteService.getPokemonList(DOWNLOAD_LIST_LIMIT)
 
-            pokemonDatabase.withTransaction {
-                pokemonDatabase.dao.clearPokemonInfo()
-                pokemonDatabase.dao.clearPokemonTypes()
-                pokemonDatabase.dao.clearPokemonTypeCrossRef()
-            }
+            pokemonLocalService.clearDatabase()
 
             val totalPokemons = pokemonList.results.size
             var downloadedPokemons = 0
@@ -71,17 +64,12 @@ internal class PokemonRepositoryImpl @Inject constructor(
                 deferredPokemonInfos.forEach { deferred ->
                     val pokemonInfoDto = deferred.await()
 
-                    pokemonDatabase.withTransaction {
-                        pokemonDatabase.dao.insertPokemonInfo(pokemonInfoDto.toPokemonInfoEntity())
-
-                        val pokemonTypes = pokemonInfoDto.toPokemonTypeEntityList()
-                        pokemonDatabase.dao.insertPokemonTypes(pokemonTypes)
-
-                        val pokemonTypeCrossRef = pokemonInfoDto.toPokemonTypeCrossRefList()
-                        pokemonDatabase.dao.insertPokemonTypeCrossRefs(pokemonTypeCrossRef)
-
-                        downloadedPokemons++
-                    }
+                    pokemonLocalService.storePokemonInfo(
+                        pokemonInfoDto.toPokemonInfoEntity(),
+                        pokemonInfoDto.toPokemonTypeEntityList(),
+                        pokemonInfoDto.toPokemonTypeCrossRefList()
+                    )
+                    downloadedPokemons++
 
                     val currentProgress = downloadedPokemons percentOf totalPokemons
                     emit(AsyncOp.Loading<Unit>(true, currentProgress))

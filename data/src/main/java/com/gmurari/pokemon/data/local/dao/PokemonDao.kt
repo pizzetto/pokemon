@@ -5,7 +5,9 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Upsert
 import com.gmurari.pokemon.data.local.entity.PokemonInfoEntity
+import com.gmurari.pokemon.data.local.entity.PokemonListItemEntity
 import com.gmurari.pokemon.data.local.entity.PokemonTypeCrossRef
 import com.gmurari.pokemon.data.local.entity.PokemonTypeEntity
 import com.gmurari.pokemon.data.local.entity.PokemonWithRelations
@@ -23,6 +25,9 @@ internal interface PokemonDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertPokemonTypes(pokemonTypes: List<PokemonTypeEntity>)
 
+    @Upsert
+    suspend fun insertPokemonList(pokemonList: List<PokemonListItemEntity>)
+
     @Transaction
     @Query(
         """
@@ -34,6 +39,13 @@ internal interface PokemonDao {
     """
     )
     fun getPokemonList(search: String, offset: Int, limit: Int): Flow<List<PokemonWithRelations>>
+
+    @Transaction
+    @Query("SELECT * FROM pokemon_info WHERE id = :id")
+    fun getPokemon(id: Int): Flow<PokemonWithRelations>
+
+    @Query("DELETE FROM pokemon_list")
+    fun clearPokemonList()
 
     @Query("DELETE FROM pokemon_info")
     fun clearPokemonInfo()

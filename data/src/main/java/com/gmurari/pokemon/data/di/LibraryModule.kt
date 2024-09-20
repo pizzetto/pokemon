@@ -2,7 +2,7 @@ package com.gmurari.pokemon.data.di
 
 import android.app.Application
 import androidx.room.Room
-import com.gmurari.pokemon.data.local.PokemonDatabase
+import com.gmurari.pokemon.data.local.db.PokemonDatabase
 import com.gmurari.pokemon.data.remote.api.PokemonApi
 import com.squareup.moshi.Moshi
 import dagger.Module
@@ -17,7 +17,6 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.create
 import javax.inject.Named
 import javax.inject.Singleton
-import javax.net.ssl.X509TrustManager
 
 @Module
 @InstallIn(SingletonComponent::class)

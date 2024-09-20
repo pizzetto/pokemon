@@ -1,10 +1,12 @@
 package com.gmurari.pokemon.data.repository
 
 import com.gmurari.pokemon.data.local.entity.PokemonInfoEntity
+import com.gmurari.pokemon.data.local.entity.PokemonListItemEntity
 import com.gmurari.pokemon.data.local.entity.PokemonTypeCrossRef
 import com.gmurari.pokemon.data.local.entity.PokemonTypeEntity
 import com.gmurari.pokemon.data.local.entity.PokemonWithRelations
 import com.gmurari.pokemon.data.remote.dto.PokemonInfoDto
+import com.gmurari.pokemon.data.remote.dto.PokemonListDto
 import com.gmurari.pokemon.domain.model.Pokemon
 
 internal fun PokemonInfoDto.toPokemonInfoEntity(): PokemonInfoEntity =
@@ -30,6 +32,14 @@ internal fun PokemonInfoDto.toPokemonTypeCrossRefList(): List<PokemonTypeCrossRe
         PokemonTypeCrossRef(
             pokemonId = id,
             typeName = it.type.name
+        )
+    }
+
+internal fun PokemonListDto.toPokemonListItemEntity(): List<PokemonListItemEntity> =
+    results.map {
+        PokemonListItemEntity(
+            name = it.name,
+            url = it.url
         )
     }
 
