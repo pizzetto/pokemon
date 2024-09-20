@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.material3.Scaffold
 import com.gmurari.pokemon.navigation.MainNavigation
 import com.gmurari.pokemon.ui.theme.PokemonTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -15,7 +16,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PokemonTheme {
-                MainNavigation()
+                Scaffold {
+                    MainNavigation(it)
+                }
             }
         }
     }

@@ -24,7 +24,8 @@ internal interface PokemonDao {
     suspend fun insertPokemonTypes(pokemonTypes: List<PokemonTypeEntity>)
 
     @Transaction
-    @Query("SELECT * FROM pokemon_info WHERE LOWER(name) LIKE '%' || LOWER(:search) || '%' LIMIT :limit OFFSET :offset")
+    @Query("SELECT * FROM pokemon_info WHERE name LIKE '%' || :search || '%' OR :search = '' LIMIT :limit OFFSET :offset")
+//    @Query("SELECT * FROM pokemon_info WHERE LOWER(name) LIKE LOWER(:search) || '%' LIMIT :limit OFFSET :offset")
     fun getPokemonList(search: String, offset: Int, limit: Int): Flow<List<PokemonWithRelations>>
 
     @Query("DELETE FROM pokemon_info")

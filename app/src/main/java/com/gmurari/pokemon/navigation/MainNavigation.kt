@@ -1,6 +1,11 @@
 package com.gmurari.pokemon.navigation
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
@@ -12,10 +17,13 @@ import com.gmurari.pokemon.presentation.welcome.WelcomeScreen
 import com.gmurari.pokemon.presentation.welcome.WelcomeUiEvent
 import com.gmurari.pokemon.presentation.welcome.WelcomeViewModel
 import com.gmurari.pokemon.presentation.welcome.event.WelcomeVmEvent
+import com.gmurari.pokemon.ui.theme.dimens
 import com.gmurari.pokemon.util.ObserveAsEvents
 
 @Composable
-fun MainNavigation() {
+fun MainNavigation(
+    paddingValues: PaddingValues
+) {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Destination.Welcome) {
 
@@ -31,7 +39,12 @@ fun MainNavigation() {
                 }
             }
 
-            WelcomeScreen(state = state) {
+            WelcomeScreen(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+                    .padding(MaterialTheme.dimens.large),
+                state = state) {
                 viewModel.onEvent(WelcomeUiEvent.OnRetryDownload)
             }
         }
@@ -40,6 +53,10 @@ fun MainNavigation() {
             val state = viewModel.state.collectAsStateWithLifecycle().value
 
             HomeScreen(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+                    .padding(MaterialTheme.dimens.large),
                 state = state,
                 onEvent = viewModel::onEvent
             )

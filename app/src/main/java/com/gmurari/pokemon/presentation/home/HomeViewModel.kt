@@ -16,8 +16,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -64,13 +66,15 @@ class HomeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            _searchString
+            _state.map { it.searchString }
+                .distinctUntilChanged()
                 .debounce(300)
                 .onEach {
                     _offset.value = 0
                 }
                 .flatMapLatest { search ->
-                    getPokemonListFlow(search)
+//                    getPokemonListFlow(search)
+                    getPokemonListUseCase(search, limit = 20, offset = _offset.value)
                 }
                 .collect {
                     _state.value = _state.value.copy(

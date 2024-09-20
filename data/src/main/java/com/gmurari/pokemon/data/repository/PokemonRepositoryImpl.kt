@@ -30,7 +30,7 @@ internal class PokemonRepositoryImpl @Inject constructor(
         offset: Int
     ): Flow<List<Pokemon>> =
 
-        pokemonDatabase.dao.getPokemonList(searchString, limit, offset).map { list ->
+        pokemonDatabase.dao.getPokemonList(searchString, offset, limit).map { list ->
             list.map {
                 it.toPokemon()
             }
@@ -57,7 +57,6 @@ internal class PokemonRepositoryImpl @Inject constructor(
             val pokemonListDto = pokemonList.body() ?: throw Exception("Pokemon list response body is null")
 
             pokemonDatabase.withTransaction {
-
                 pokemonDatabase.dao.clearPokemonInfo()
                 pokemonDatabase.dao.clearPokemonTypes()
                 pokemonDatabase.dao.clearPokemonTypeCrossRef()

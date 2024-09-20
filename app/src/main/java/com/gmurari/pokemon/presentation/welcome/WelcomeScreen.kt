@@ -14,11 +14,12 @@ import com.gmurari.pokemon.ui.theme.dimens
 
 @Composable
 fun WelcomeScreen(
+    modifier: Modifier = Modifier,
     state: WelcomeUiState,
     onRetry: () -> Unit
 ) {
     Box(
-        modifier = Modifier.fillMaxSize().padding(MaterialTheme.dimens.medium),
+        modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
         if (state.isLoading) {
