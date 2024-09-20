@@ -3,4 +3,7 @@
     <string name="loading">Loading...</string>
     <string name="unknown_error">Unknown error</string>
     <string name="retry">Retry</string>
+    <string name="pokemon">Pokemon</string>
+    <string name="box">Box</string>
+    <string name="search_name_or_type">Search name or type</string>
 </resources>

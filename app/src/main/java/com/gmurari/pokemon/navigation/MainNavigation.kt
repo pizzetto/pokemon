@@ -39,7 +39,10 @@ fun MainNavigation() {
             val viewModel = hiltViewModel<HomeViewModel>()
             val state = viewModel.state.collectAsStateWithLifecycle().value
 
-            HomeScreen(state = state)
+            HomeScreen(
+                state = state,
+                onEvent = viewModel::onEvent
+            )
         }
     }
 }

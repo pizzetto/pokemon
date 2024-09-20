@@ -13,6 +13,7 @@ internal fun PokemonInfoDto.toPokemonInfoEntity(): PokemonInfoEntity =
         name = name,
         height = height,
         weight = weight,
+        imageUrl = sprites.frontDefault,
         speciesDescription = "" //TODO
     )
 
@@ -39,5 +40,6 @@ internal fun PokemonWithRelations.toPokemon(): Pokemon =
         height = pokemon.height,
         weight = pokemon.weight,
         types = types.map { it.name },
+        imageUrl = pokemon.imageUrl,
         speciesDescription = pokemon.speciesDescription
     )

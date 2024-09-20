@@ -1,11 +1,11 @@
 package com.gmurari.pokemon.data.repository
 
-import com.gmurari.pokemon.data.local.dao.PokemonDao
+import androidx.room.withTransaction
+import com.gmurari.pokemon.data.local.PokemonDatabase
 import com.gmurari.pokemon.data.remote.api.PokemonApi
 import com.gmurari.pokemon.data.util.percentOf
 import com.gmurari.pokemon.domain.model.Pokemon
 import com.gmurari.pokemon.domain.repository.AsyncOp
-import com.gmurari.pokemon.domain.repository.Percentage
 import com.gmurari.pokemon.domain.repository.PokemonRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -20,7 +20,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class PokemonRepositoryImpl @Inject constructor(
-    private val pokemonDao: PokemonDao,
+    private val pokemonDatabase: PokemonDatabase,
     private val pokemonApi: PokemonApi
 ): PokemonRepository {
 
@@ -30,7 +30,7 @@ internal class PokemonRepositoryImpl @Inject constructor(
         offset: Int
     ): Flow<List<Pokemon>> =
 
-        pokemonDao.getPokemonList(searchString, limit, offset).map { list ->
+        pokemonDatabase.dao.getPokemonList(searchString, limit, offset).map { list ->
             list.map {
                 it.toPokemon()
             }
@@ -43,6 +43,10 @@ internal class PokemonRepositoryImpl @Inject constructor(
      *
      * It can be refactored further to separate the download from the saving to the database,
      * to improve the maintainability and testability of the code.
+     *
+     * I chosen to download all pokemon first, to enable the user to search for a part of the name or
+     * part of type name. I know it's slow and not ideal.
+     * Otherwise i would have used a RemoteMediator to download the pokemon as they are scrolled
      */
     override fun downloadPokemonList(): Flow<AsyncOp<Unit>> = flow {
         try {
@@ -52,9 +56,12 @@ internal class PokemonRepositoryImpl @Inject constructor(
             if (!pokemonList.isSuccessful) throw Exception("Failed to fetch Pokemon list")
             val pokemonListDto = pokemonList.body() ?: throw Exception("Pokemon list response body is null")
 
-            pokemonDao.clearPokemonInfo()
-            pokemonDao.clearPokemonTypes()
-            pokemonDao.clearPokemonTypeCrossRef()
+            pokemonDatabase.withTransaction {
+
+                pokemonDatabase.dao.clearPokemonInfo()
+                pokemonDatabase.dao.clearPokemonTypes()
+                pokemonDatabase.dao.clearPokemonTypeCrossRef()
+            }
 
             val totalPokemons = pokemonListDto.results.size
             var downloadedPokemons = 0
@@ -64,21 +71,26 @@ internal class PokemonRepositoryImpl @Inject constructor(
                     async {
                         val pokemonInfo = pokemonApi.getPokemonInfo(pokemonListItemDto.name)
                         if (!pokemonInfo.isSuccessful) throw Exception("Failed to fetch info for ${pokemonListItemDto.name}")
-                        pokemonInfo.body() ?: throw Exception("Pokemon info response body is null for ${pokemonListItemDto.name}")
+                        pokemonInfo.body()
+                            ?: throw Exception("Pokemon info response body is null for ${pokemonListItemDto.name}")
                     }
                 }
 
                 deferredPokemonInfos.forEach { deferred ->
                     val pokemonInfoDto = deferred.await()
-                    pokemonDao.insertPokemonInfo(pokemonInfoDto.toPokemonInfoEntity())
 
-                    val pokemonTypes = pokemonInfoDto.toPokemonTypeEntityList()
-                    pokemonDao.insertPokemonTypes(pokemonTypes)
+                    pokemonDatabase.withTransaction {
+                        pokemonDatabase.dao.insertPokemonInfo(pokemonInfoDto.toPokemonInfoEntity())
 
-                    val pokemonTypeCrossRef = pokemonInfoDto.toPokemonTypeCrossRefList()
-                    pokemonDao.insertPokemonTypeCrossRefs(pokemonTypeCrossRef)
+                        val pokemonTypes = pokemonInfoDto.toPokemonTypeEntityList()
+                        pokemonDatabase.dao.insertPokemonTypes(pokemonTypes)
 
-                    downloadedPokemons++
+                        val pokemonTypeCrossRef = pokemonInfoDto.toPokemonTypeCrossRefList()
+                        pokemonDatabase.dao.insertPokemonTypeCrossRefs(pokemonTypeCrossRef)
+
+                        downloadedPokemons++
+                    }
+
                     val currentProgress = downloadedPokemons percentOf totalPokemons
                     emit(AsyncOp.Loading<Unit>(true, currentProgress))
                 }

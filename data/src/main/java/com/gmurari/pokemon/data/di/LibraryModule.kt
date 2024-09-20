@@ -60,7 +60,7 @@ internal object LibraryModule {
     @Singleton
     @Named("baseUrl")
     fun provideBaseUrl(): String {
-        return "https://pokeapi.co/api/v2/"
+        return PokemonApi.BASE_URL
     }
 
     /**

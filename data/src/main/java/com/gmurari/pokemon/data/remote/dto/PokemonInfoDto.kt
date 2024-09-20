@@ -9,5 +9,6 @@ data class PokemonInfoDto(
     val height: Int, // 7
     val weight: Int, // 69
     val species: PokemonInfoSpeciesDto,
+    val sprites: PokemonInfoSpritesDto,
     val types: List<PokemonInfoTypeDto>,
 )
