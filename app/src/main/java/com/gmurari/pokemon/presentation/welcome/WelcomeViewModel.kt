@@ -3,6 +3,7 @@ package com.gmurari.pokemon.presentation.welcome
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gmurari.pokemon.domain.repository.AsyncOp
+import com.gmurari.pokemon.domain.repository.PokemonRepository
 import com.gmurari.pokemon.domain.usecase.DownloadPokemonListUseCase
 import com.gmurari.pokemon.presentation.welcome.event.WelcomeVmEvent
 import com.gmurari.pokemon.presentation.welcome.state.WelcomeUiState
@@ -19,7 +20,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class WelcomeViewModel @Inject constructor(
-    private val downloadPokemonListUseCase: DownloadPokemonListUseCase,
+    private val pokemonRepository: PokemonRepository
 ): ViewModel() {
 
     private val _state = MutableStateFlow(WelcomeUiState())
@@ -38,7 +39,7 @@ class WelcomeViewModel @Inject constructor(
 
     private suspend fun downloadPokemonList() {
 
-        downloadPokemonListUseCase().collect { asyncOp ->
+        pokemonRepository.downloadPokemonList().collect { asyncOp ->
             when (asyncOp) {
                 is AsyncOp.Error -> {
                     _state.value = _state.value.copy(

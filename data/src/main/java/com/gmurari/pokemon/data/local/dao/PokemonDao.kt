@@ -1,5 +1,6 @@
 package com.gmurari.pokemon.data.local.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -38,7 +39,28 @@ internal interface PokemonDao {
     LIMIT :limit OFFSET :offset
     """
     )
-    fun getPokemonList(search: String, offset: Int, limit: Int): Flow<List<PokemonWithRelations>>
+    fun getPokemonInfoList(search: String, offset: Int, limit: Int): Flow<List<PokemonWithRelations>>
+
+    @Query(
+        """
+            SELECT * FROM pokemon_info
+    WHERE 
+        name LIKE :search || '%'OR :search = '' 
+        OR id IN (SELECT pokemonId FROM pokemon_type_cross_ref WHERE typeName LIKE '%' || :search || '%') 
+        """
+    )
+    fun pagingSource(search: String): PagingSource<Int, PokemonWithRelations>
+
+    @Query(
+        """
+            SELECT * FROM pokemon_list 
+    WHERE 
+        name LIKE :search || '%'OR :search = '' 
+        OR id IN (SELECT pokemonId FROM pokemon_type_cross_ref WHERE typeName LIKE '%' || :search || '%') 
+        LIMIT :limit OFFSET :offset
+        """
+    )
+    fun getPokemonList(search: String, offset: Int, limit: Int): Flow<List<PokemonListItemEntity>>
 
     @Transaction
     @Query("SELECT * FROM pokemon_info WHERE id = :id")

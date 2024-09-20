@@ -11,4 +11,7 @@ object Destination {
 
     @Serializable
     object Home
+
+    @Serializable
+    object HomeWithPager
 }

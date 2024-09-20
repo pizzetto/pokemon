@@ -11,8 +11,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.gmurari.pokemon.presentation.home.HomeScreen
 import com.gmurari.pokemon.presentation.home.HomeViewModel
+import com.gmurari.pokemon.presentation.home_with_pager.HomeWIthPagerViewModel
+import com.gmurari.pokemon.presentation.home_with_pager.HomeWithPagerScreen
 import com.gmurari.pokemon.presentation.welcome.WelcomeScreen
 import com.gmurari.pokemon.presentation.welcome.WelcomeUiEvent
 import com.gmurari.pokemon.presentation.welcome.WelcomeViewModel
@@ -33,7 +36,7 @@ fun MainNavigation(
 
             ObserveAsEvents(flow = viewModel.event) {
                 when (it) {
-                    WelcomeVmEvent.DownloadCompleted -> navController.navigate(Destination.Home) {
+                    WelcomeVmEvent.DownloadCompleted -> navController.navigate(Destination.HomeWithPager) {
                         popUpTo(0)
                     }
                 }
@@ -58,6 +61,21 @@ fun MainNavigation(
                     .fillMaxSize()
                     .padding(MaterialTheme.dimens.large),
                 state = state,
+                onEvent = viewModel::onEvent
+            )
+        }
+        composable<Destination.HomeWithPager> {
+            val viewModel = hiltViewModel<HomeWIthPagerViewModel>()
+            val pokemonList = viewModel.pagingDataFlow.collectAsLazyPagingItems()
+            val searchQuery = viewModel.searchQuery.collectAsStateWithLifecycle().value
+
+            HomeWithPagerScreen(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+                    .padding(MaterialTheme.dimens.large),
+                pokemonList = pokemonList,
+                searchString = searchQuery,
                 onEvent = viewModel::onEvent
             )
         }

@@ -1,5 +1,6 @@
 package com.gmurari.pokemon.data.local.impl
 
+import androidx.paging.PagingSource
 import androidx.room.withTransaction
 import com.gmurari.pokemon.data.local.PokemonLocalService
 import com.gmurari.pokemon.data.local.db.PokemonDatabase
@@ -17,11 +18,18 @@ internal class PokemonLocalServiceImpl @Inject constructor(
     private val pokemonDatabase: PokemonDatabase
 ): PokemonLocalService {
 
-    override fun getPokemonList(
+    override fun getPokemonInfoList(
         search: String,
         offset: Int,
         limit: Int
     ): Flow<List<PokemonWithRelations>> =
+        pokemonDatabase.dao.getPokemonInfoList(search, offset, limit)
+
+    override fun getPokemonList(
+        search: String,
+        offset: Int,
+        limit: Int
+    ): Flow<List<PokemonListItemEntity>> =
         pokemonDatabase.dao.getPokemonList(search, offset, limit)
 
     override fun getPokemon(id: Int): Flow<PokemonWithRelations> =
@@ -43,13 +51,14 @@ internal class PokemonLocalServiceImpl @Inject constructor(
         pokemonDatabase.dao.insertPokemonList(pokemonListItems)
     }
 
-    override suspend fun clearDatabase() {
+    override suspend fun clearPokemonInfo() {
         pokemonDatabase.withTransaction {
             pokemonDatabase.dao.clearPokemonInfo()
             pokemonDatabase.dao.clearPokemonTypes()
             pokemonDatabase.dao.clearPokemonTypeCrossRef()
-            pokemonDatabase.dao.clearPokemonList()
         }
     }
 
+    override fun getPokemonPagingSource(search: String): PagingSource<Int, PokemonWithRelations> =
+        pokemonDatabase.dao.pagingSource(search)
 }

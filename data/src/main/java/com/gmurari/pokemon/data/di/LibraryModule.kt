@@ -1,8 +1,12 @@
 package com.gmurari.pokemon.data.di
 
 import android.app.Application
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.room.Room
+import com.gmurari.pokemon.data.local.PokemonLocalService
 import com.gmurari.pokemon.data.local.db.PokemonDatabase
+import com.gmurari.pokemon.data.remote.PokemonRemoteService
 import com.gmurari.pokemon.data.remote.api.PokemonApi
 import com.squareup.moshi.Moshi
 import dagger.Module

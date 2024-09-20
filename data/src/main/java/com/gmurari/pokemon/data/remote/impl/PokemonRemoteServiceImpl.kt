@@ -17,8 +17,8 @@ internal class PokemonRemoteServiceImpl @Inject constructor(
             ?: throw Exception("Pokemon info response body is null for $pokemonName")
     }
 
-    override suspend fun getPokemonList(limit: Int): PokemonListDto {
-        val pokemonList = pokemonApi.getPokemonList(limit)
+    override suspend fun getPokemonList(limit: Int, offset: Int): PokemonListDto {
+        val pokemonList = pokemonApi.getPokemonList(limit, offset)
         if (!pokemonList.isSuccessful) throw Exception("Failed to fetch Pokemon list")
         return pokemonList.body() ?: throw Exception("Pokemon list response body is null")
     }
