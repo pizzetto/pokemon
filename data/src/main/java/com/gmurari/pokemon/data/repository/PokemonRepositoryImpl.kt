@@ -35,7 +35,6 @@ internal class PokemonRepositoryImpl @Inject constructor(
                 it.toPokemon()
             }
         }
-            .onStart { emit(emptyList()) }
 
 
     /**

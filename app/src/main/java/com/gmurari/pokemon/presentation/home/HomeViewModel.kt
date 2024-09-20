@@ -35,25 +35,9 @@ class HomeViewModel @Inject constructor(
     private val _state = MutableStateFlow(HomeUiState())
     val state = _state.asStateFlow()
 
-    private val _searchString = MutableStateFlow("")
-    val searchString = _searchString.asStateFlow()
-
-    private val _offset = MutableStateFlow(0)
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val pokemonList = searchString
-        .debounce(300) // To prevent too many requests
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), "")
-        /*.flatMapLatest { search ->
-            _offset.value = 0 // Reset offset on new search
-            getPokemonListFlow(search)
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())*/
-
-    private fun getPokemonListFlow(search: String): Flow<List<Pokemon>> = flow {
-        val currentOffset = _offset.value
+    /*private fun getPokemonListFlow(search: String): Flow<List<Pokemon>> = flow {
         getPokemonListUseCase(search, limit = 20, offset = currentOffset)
-    }
+    }*/
     /*init {
         viewModelScope.launch {
             getPokemonListUseCase("", 20, 0).collect { pokemonList ->
@@ -66,19 +50,20 @@ class HomeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            _state.map { it.searchString }
+            _state.map { it.searchString to it.page }
                 .distinctUntilChanged()
                 .debounce(300)
-                .onEach {
-                    _offset.value = 0
-                }
-                .flatMapLatest { search ->
-//                    getPokemonListFlow(search)
-                    getPokemonListUseCase(search, limit = 20, offset = _offset.value)
+                .flatMapLatest { (search, page) ->
+                    getPokemonListUseCase(
+                        search,
+                        limit = PAGE_SIZE,
+                        page = page
+                    )
                 }
                 .collect {
                     _state.value = _state.value.copy(
-                        pokemonList = it
+                        canPaginate = it.isNotEmpty(),
+                        pokemonList = _state.value.pokemonList + it,
                     )
                 }
         }
@@ -89,10 +74,26 @@ class HomeViewModel @Inject constructor(
             is HomeUiEvent.OnSearchStringChange -> {
                 _state.update {
                     it.copy(
-                        searchString = event.searchString
+                        searchString = event.searchString,
+                        page = INITIAL_PAGE,
+                        pokemonList = emptyList(),
+                        canPaginate = false
+                    )
+                }
+            }
+
+            is HomeUiEvent.OnPageChange -> {
+                _state.update {
+                    it.copy(
+                        page = event.page
                     )
                 }
             }
         }
+    }
+
+    companion object {
+        const val PAGE_SIZE = 20
+        const val INITIAL_PAGE = 1
     }
 }

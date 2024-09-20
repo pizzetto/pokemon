@@ -1,10 +1,7 @@
 package com.gmurari.pokemon.presentation.home.sections
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,12 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,7 +23,6 @@ import com.gmurari.pokemon.domain.model.Pokemon
 import com.gmurari.pokemon.ui.theme.PokemonTheme
 import com.gmurari.pokemon.ui.theme.dimens
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PokemonItem(
     modifier: Modifier = Modifier,
@@ -60,27 +54,7 @@ fun PokemonItem(
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.dimens.small)
-            ) {
-                pokemon.types.forEach {
-                    Text(
-                        text = it.capitalize(currentLocale),
-                        modifier = Modifier
-                            .background(
-                                color = Color.LightGray,
-                                shape = RoundedCornerShape(MaterialTheme.dimens.small)
-                            )
-                            .padding(
-                                horizontal = MaterialTheme.dimens.medium,
-                                vertical = MaterialTheme.dimens.small
-                            ),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = Color.Gray
-                    )
-                }
-            }
+            PokemonTypes(modifier = Modifier.fillMaxWidth(), pokemon = pokemon)
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
             Text(
                 text = pokemon.speciesDescription,
