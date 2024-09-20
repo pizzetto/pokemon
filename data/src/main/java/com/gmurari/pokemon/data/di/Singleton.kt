@@ -1,5 +1,7 @@
 package com.gmurari.pokemon.data.di
 
+import com.gmurari.pokemon.data.remote.PokemonRemoteService
+import com.gmurari.pokemon.data.remote.impl.PokemonRemoteServiceImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -21,4 +23,11 @@ internal abstract class Singleton {
     @Binds
     @Singleton
     abstract fun provideMessageRepository(repository: PokemonRepositoryImpl): PokemonRepository
+
+    /**
+     * Provide the implementation of [PokemonRemoteServiceImpl].
+     */
+    @Binds
+    @Singleton
+    abstract fun providePokemonRemoteService(service: PokemonRemoteServiceImpl): PokemonRemoteService
 }

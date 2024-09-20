@@ -3,7 +3,7 @@ package com.gmurari.pokemon.data.remote.dto
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
-data class PokemonInfoDto(
+internal data class PokemonInfoDto(
     val id: Int, // 1
     val name: String, // "bulbasaur"
     val height: Int, // 7

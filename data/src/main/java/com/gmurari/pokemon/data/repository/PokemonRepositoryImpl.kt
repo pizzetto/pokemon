@@ -2,7 +2,7 @@ package com.gmurari.pokemon.data.repository
 
 import androidx.room.withTransaction
 import com.gmurari.pokemon.data.local.PokemonDatabase
-import com.gmurari.pokemon.data.remote.api.PokemonApi
+import com.gmurari.pokemon.data.remote.PokemonRemoteService
 import com.gmurari.pokemon.data.util.percentOf
 import com.gmurari.pokemon.domain.model.Pokemon
 import com.gmurari.pokemon.domain.repository.AsyncOp
@@ -14,14 +14,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 internal class PokemonRepositoryImpl @Inject constructor(
     private val pokemonDatabase: PokemonDatabase,
-    private val pokemonApi: PokemonApi
+    private val pokemonRemoteService: PokemonRemoteService
 ): PokemonRepository {
 
     override fun getPokemonList(
@@ -47,13 +46,11 @@ internal class PokemonRepositoryImpl @Inject constructor(
      * part of type name. I know it's slow and not ideal.
      * Otherwise i would have used a RemoteMediator to download the pokemon as they are scrolled
      */
-    override fun downloadPokemonList(): Flow<AsyncOp<Unit>> = flow {
+    override fun downloadAllPokemonData(): Flow<AsyncOp<Unit>> = flow {
         try {
             emit(AsyncOp.Loading(true, 0.0))
 
-            val pokemonList = pokemonApi.getPokemonList(DOWNLOAD_LIST_LIMIT)
-            if (!pokemonList.isSuccessful) throw Exception("Failed to fetch Pokemon list")
-            val pokemonListDto = pokemonList.body() ?: throw Exception("Pokemon list response body is null")
+            val pokemonList = pokemonRemoteService.getPokemonList(DOWNLOAD_LIST_LIMIT)
 
             pokemonDatabase.withTransaction {
                 pokemonDatabase.dao.clearPokemonInfo()
@@ -61,16 +58,13 @@ internal class PokemonRepositoryImpl @Inject constructor(
                 pokemonDatabase.dao.clearPokemonTypeCrossRef()
             }
 
-            val totalPokemons = pokemonListDto.results.size
+            val totalPokemons = pokemonList.results.size
             var downloadedPokemons = 0
 
             coroutineScope {
-                val deferredPokemonInfos = pokemonListDto.results.map { pokemonListItemDto ->
+                val deferredPokemonInfos = pokemonList.results.map { pokemonListItemDto ->
                     async {
-                        val pokemonInfo = pokemonApi.getPokemonInfo(pokemonListItemDto.name)
-                        if (!pokemonInfo.isSuccessful) throw Exception("Failed to fetch info for ${pokemonListItemDto.name}")
-                        pokemonInfo.body()
-                            ?: throw Exception("Pokemon info response body is null for ${pokemonListItemDto.name}")
+                        pokemonRemoteService.getPokemonInfo(pokemonListItemDto.name)
                     }
                 }
 
