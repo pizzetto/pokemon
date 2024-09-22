@@ -91,14 +91,19 @@ internal class PokemonRepositoryImpl @Inject constructor(
         }
     }.flowOn(Dispatchers.IO)
 
-    override fun downloadPokemonList(): Flow<AsyncOp<Unit>> = flow<AsyncOp<Unit>> {
+    override fun downloadPokemonList(): Flow<AsyncOp<Unit>> = flow {
         try {
             emit(AsyncOp.Loading(true, 0.0))
 
+            emit(AsyncOp.Loading(true, 25.0))
             pokemonLocalService.clearPokemonInfo()
+            emit(AsyncOp.Loading(true, 50.0))
 
             val pokemonList = pokemonRemoteService.getPokemonList(DOWNLOAD_LIST_LIMIT)
+            emit(AsyncOp.Loading(true, 75.0))
+
             pokemonLocalService.storePokemonListItems(pokemonList.toPokemonListItemEntity())
+            emit(AsyncOp.Loading(true, 100.0))
 
             emit(AsyncOp.Success(Unit))
 
