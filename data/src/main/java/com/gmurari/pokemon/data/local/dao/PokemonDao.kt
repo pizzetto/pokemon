@@ -9,6 +9,7 @@ import androidx.room.Transaction
 import androidx.room.Upsert
 import com.gmurari.pokemon.data.local.entity.PokemonInfoEntity
 import com.gmurari.pokemon.data.local.entity.PokemonListItemEntity
+import com.gmurari.pokemon.data.local.entity.PokemonSpeciesEntity
 import com.gmurari.pokemon.data.local.entity.PokemonTypeCrossRef
 import com.gmurari.pokemon.data.local.entity.PokemonTypeEntity
 import com.gmurari.pokemon.data.local.entity.PokemonWithRelations
@@ -29,6 +30,9 @@ internal interface PokemonDao {
     @Upsert
     suspend fun insertPokemonList(pokemonList: List<PokemonListItemEntity>)
 
+    @Upsert
+    suspend fun insertPokemonSpecies(pokemonSpecies: PokemonSpeciesEntity)
+
     @Transaction
     @Query(
         """
@@ -41,6 +45,7 @@ internal interface PokemonDao {
     )
     fun getPokemonInfoList(search: String, offset: Int, limit: Int): Flow<List<PokemonWithRelations>>
 
+    @Transaction
     @Query(
         """
             SELECT * FROM pokemon_info
@@ -55,12 +60,14 @@ internal interface PokemonDao {
         """
             SELECT * FROM pokemon_list 
     WHERE 
+        (
         name LIKE :search || '%'OR :search = '' 
         OR id IN (SELECT pokemonId FROM pokemon_type_cross_ref WHERE typeName LIKE '%' || :search || '%') 
-        LIMIT :limit OFFSET :offset
+        ) AND id > :lastRetrievedId
+        LIMIT :limit
         """
     )
-    fun getPokemonList(search: String, offset: Int, limit: Int): Flow<List<PokemonListItemEntity>>
+    fun getPokemonList(search: String, lastRetrievedId: Int, limit: Int): Flow<List<PokemonListItemEntity>>
 
     @Transaction
     @Query("SELECT * FROM pokemon_info WHERE id = :id")
@@ -77,5 +84,8 @@ internal interface PokemonDao {
 
     @Query("DELETE FROM pokemon_type_cross_ref")
     fun clearPokemonTypeCrossRef()
+
+    @Query("DELETE FROM pokemon_species")
+    fun clearPokemonSpecies()
 
 }

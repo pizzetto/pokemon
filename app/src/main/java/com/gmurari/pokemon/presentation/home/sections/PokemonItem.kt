@@ -14,8 +14,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -44,7 +47,7 @@ fun PokemonItem(
         Spacer(modifier = Modifier.width(MaterialTheme.dimens.large))
         Column(
             modifier = Modifier
-                .weight(3f)
+                .weight(4f)
                 .fillMaxHeight(),
             verticalArrangement = Arrangement.Center
         ) {
@@ -56,11 +59,14 @@ fun PokemonItem(
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
             PokemonTypes(modifier = Modifier.fillMaxWidth(), pokemon = pokemon)
             Spacer(modifier = Modifier.height(MaterialTheme.dimens.medium))
-            Text(
-                text = pokemon.speciesDescription,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.fillMaxWidth()
-            )
+            pokemon.speciesDescription?.let {
+                Text(
+                    text = it.replace("\n", " "),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.fillMaxWidth(),
+                    color = Color.Gray
+                )
+            }
         }
     }
 }

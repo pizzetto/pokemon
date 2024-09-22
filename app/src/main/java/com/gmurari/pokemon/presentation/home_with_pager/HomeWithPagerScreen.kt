@@ -35,6 +35,7 @@ import com.gmurari.pokemon.R
 import com.gmurari.pokemon.domain.model.Pokemon
 import com.gmurari.pokemon.presentation.home.sections.PokemonItem
 import com.gmurari.pokemon.presentation.home_with_pager.event.HomeWithPagerEvent
+import com.gmurari.pokemon.presentation.home_with_pager.sections.PokemonListProgressIndicator
 import com.gmurari.pokemon.ui.theme.dimens
 
 @Composable
@@ -112,18 +113,18 @@ fun HomeWithPagerScreen(
             pokemonList.apply {
                 when {
                     loadState.refresh is LoadState.Loading -> {
-                        item { CircularProgressIndicator(modifier = Modifier.padding(MaterialTheme.dimens.medium)) }
+                        item { PokemonListProgressIndicator() }
                     }
 
                     loadState.append is LoadState.Loading -> {
-                        item { CircularProgressIndicator(modifier = Modifier.padding(MaterialTheme.dimens.medium)) }
+                        item { PokemonListProgressIndicator() }
                     }
 
                     loadState.refresh is LoadState.Error -> {
                         val e = pokemonList.loadState.refresh as LoadState.Error
                         item {
                             Text(
-                                text = "Errore: ${e.error.localizedMessage}",
+                                text = stringResource(R.string.error, e.error.localizedMessage ?: "Unknown error"),
                                 color = Color.Red,
                                 modifier = Modifier.padding(MaterialTheme.dimens.medium)
                             )
@@ -134,7 +135,7 @@ fun HomeWithPagerScreen(
                         val e = pokemonList.loadState.append as LoadState.Error
                         item {
                             Text(
-                                text = "Errore: ${e.error.localizedMessage}",
+                                text = stringResource(R.string.error, e.error.localizedMessage ?: "Unknown error"),
                                 color = Color.Red,
                                 modifier = Modifier.padding(MaterialTheme.dimens.medium)
                             )

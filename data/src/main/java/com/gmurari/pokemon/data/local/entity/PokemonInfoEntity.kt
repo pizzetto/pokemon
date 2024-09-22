@@ -11,5 +11,5 @@ data class PokemonInfoEntity(
     val height: Int, // 7
     val weight: Int, // 69
     val imageUrl: String?,
-    val speciesDescription: String
+    val speciesName: String
 )

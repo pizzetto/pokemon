@@ -15,5 +15,10 @@ data class PokemonWithRelations(
             entityColumn = "typeName"
         )
     )
-    val types: List<PokemonTypeEntity>
+    val types: List<PokemonTypeEntity>,
+    @Relation(
+        parentColumn = "speciesName",
+        entityColumn = "name"
+    )
+    val species: PokemonSpeciesEntity
 )

@@ -16,8 +16,8 @@ internal interface PokemonApi {
     @GET("pokemon/{name}")
     suspend fun getPokemonInfo(@Path("name") name: String): Response<PokemonInfoDto>
 
-    @GET("pokemon-species/{id}")
-    suspend fun getPokemonSpecieById(@Path("id") id: Int): Response<PokemonSpeciesDto>
+    @GET("pokemon-species/{name}")
+    suspend fun getPokemonSpecieByName(@Path("name") name: String): Response<PokemonSpeciesDto>
 
     companion object {
         const val BASE_URL = "https://pokeapi.co/api/v2/"

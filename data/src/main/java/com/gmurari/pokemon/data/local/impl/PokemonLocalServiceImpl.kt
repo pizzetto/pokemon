@@ -6,6 +6,7 @@ import com.gmurari.pokemon.data.local.PokemonLocalService
 import com.gmurari.pokemon.data.local.db.PokemonDatabase
 import com.gmurari.pokemon.data.local.entity.PokemonInfoEntity
 import com.gmurari.pokemon.data.local.entity.PokemonListItemEntity
+import com.gmurari.pokemon.data.local.entity.PokemonSpeciesEntity
 import com.gmurari.pokemon.data.local.entity.PokemonTypeCrossRef
 import com.gmurari.pokemon.data.local.entity.PokemonTypeEntity
 import com.gmurari.pokemon.data.local.entity.PokemonWithRelations
@@ -27,10 +28,10 @@ internal class PokemonLocalServiceImpl @Inject constructor(
 
     override fun getPokemonList(
         search: String,
-        offset: Int,
+        lastRetrievedId: Int,
         limit: Int
     ): Flow<List<PokemonListItemEntity>> =
-        pokemonDatabase.dao.getPokemonList(search, offset, limit)
+        pokemonDatabase.dao.getPokemonList(search, lastRetrievedId, limit)
 
     override fun getPokemon(id: Int): Flow<PokemonWithRelations> =
         pokemonDatabase.dao.getPokemon(id)
@@ -51,11 +52,16 @@ internal class PokemonLocalServiceImpl @Inject constructor(
         pokemonDatabase.dao.insertPokemonList(pokemonListItems)
     }
 
+    override suspend fun storePokemonSpecies(pokemonSpecies: PokemonSpeciesEntity) {
+        pokemonDatabase.dao.insertPokemonSpecies(pokemonSpecies)
+    }
+
     override suspend fun clearPokemonInfo() {
         pokemonDatabase.withTransaction {
             pokemonDatabase.dao.clearPokemonInfo()
             pokemonDatabase.dao.clearPokemonTypes()
             pokemonDatabase.dao.clearPokemonTypeCrossRef()
+            pokemonDatabase.dao.clearPokemonSpecies()
         }
     }
 

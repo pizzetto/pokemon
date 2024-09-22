@@ -6,4 +6,5 @@
     <string name="pokemon">Pokemon</string>
     <string name="box">Box</string>
     <string name="search_name_or_type">Search name or type</string>
+    <string name="error">Error: %1$s</string>
 </resources>

@@ -2,11 +2,13 @@ package com.gmurari.pokemon.data.repository
 
 import com.gmurari.pokemon.data.local.entity.PokemonInfoEntity
 import com.gmurari.pokemon.data.local.entity.PokemonListItemEntity
+import com.gmurari.pokemon.data.local.entity.PokemonSpeciesEntity
 import com.gmurari.pokemon.data.local.entity.PokemonTypeCrossRef
 import com.gmurari.pokemon.data.local.entity.PokemonTypeEntity
 import com.gmurari.pokemon.data.local.entity.PokemonWithRelations
 import com.gmurari.pokemon.data.remote.dto.PokemonInfoDto
 import com.gmurari.pokemon.data.remote.dto.PokemonListDto
+import com.gmurari.pokemon.data.remote.dto.PokemonSpeciesDto
 import com.gmurari.pokemon.domain.model.Pokemon
 
 internal fun PokemonInfoDto.toPokemonInfoEntity(): PokemonInfoEntity =
@@ -16,7 +18,7 @@ internal fun PokemonInfoDto.toPokemonInfoEntity(): PokemonInfoEntity =
         height = height,
         weight = weight,
         imageUrl = sprites.frontDefault,
-        speciesDescription = "" //TODO
+        speciesName = species.name
     )
 
 internal fun PokemonInfoDto.toPokemonTypeEntityList(): List<PokemonTypeEntity> =
@@ -43,6 +45,16 @@ internal fun PokemonListDto.toPokemonListItemEntity(): List<PokemonListItemEntit
         )
     }
 
+/**
+ * For the sake of this application I only use the first flavor text entry as a description
+ */
+internal fun PokemonSpeciesDto.toPokemonSpeciesEntity(): PokemonSpeciesEntity =
+    PokemonSpeciesEntity(
+        id = id,
+        name = name,
+        description = flavorTextEntries.firstOrNull()?.flavorText
+    )
+
 internal fun PokemonWithRelations.toPokemon(): Pokemon =
     Pokemon(
         id = pokemon.id,
@@ -51,5 +63,5 @@ internal fun PokemonWithRelations.toPokemon(): Pokemon =
         weight = pokemon.weight,
         types = types.map { it.name },
         imageUrl = pokemon.imageUrl,
-        speciesDescription = pokemon.speciesDescription
+        speciesDescription = species.description
     )

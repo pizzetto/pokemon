@@ -3,6 +3,7 @@ package com.gmurari.pokemon.data.local
 import androidx.paging.PagingSource
 import com.gmurari.pokemon.data.local.entity.PokemonInfoEntity
 import com.gmurari.pokemon.data.local.entity.PokemonListItemEntity
+import com.gmurari.pokemon.data.local.entity.PokemonSpeciesEntity
 import com.gmurari.pokemon.data.local.entity.PokemonTypeCrossRef
 import com.gmurari.pokemon.data.local.entity.PokemonTypeEntity
 import com.gmurari.pokemon.data.local.entity.PokemonWithRelations
@@ -12,7 +13,7 @@ internal interface PokemonLocalService {
 
     fun getPokemonInfoList(search: String, offset: Int, limit: Int): Flow<List<PokemonWithRelations>>
 
-    fun getPokemonList(search: String, offset: Int, limit: Int): Flow<List<PokemonListItemEntity>>
+    fun getPokemonList(search: String, lastRetrievedId: Int, limit: Int): Flow<List<PokemonListItemEntity>>
 
     fun getPokemon(id: Int): Flow<PokemonWithRelations>
 
@@ -21,6 +22,8 @@ internal interface PokemonLocalService {
                                  pokemonTypeCrossRefEntities: List<PokemonTypeCrossRef>)
 
     suspend fun storePokemonListItems(pokemonListItems: List<PokemonListItemEntity>)
+
+    suspend fun storePokemonSpecies(pokemonSpecies: PokemonSpeciesEntity)
 
     fun getPokemonPagingSource(search: String): PagingSource<Int, PokemonWithRelations>
 

@@ -5,6 +5,7 @@ import androidx.room.RoomDatabase
 import com.gmurari.pokemon.data.local.dao.PokemonDao
 import com.gmurari.pokemon.data.local.entity.PokemonInfoEntity
 import com.gmurari.pokemon.data.local.entity.PokemonListItemEntity
+import com.gmurari.pokemon.data.local.entity.PokemonSpeciesEntity
 import com.gmurari.pokemon.data.local.entity.PokemonTypeCrossRef
 import com.gmurari.pokemon.data.local.entity.PokemonTypeEntity
 
@@ -12,10 +13,12 @@ import com.gmurari.pokemon.data.local.entity.PokemonTypeEntity
     entities = [
         PokemonListItemEntity::class,
         PokemonInfoEntity::class,
+        PokemonSpeciesEntity::class,
         PokemonTypeEntity::class,
         PokemonTypeCrossRef::class
     ],
-    version = 1
+    version = 1,
+    exportSchema = false
 )
 internal abstract class PokemonDatabase: RoomDatabase() {
     abstract val dao: PokemonDao

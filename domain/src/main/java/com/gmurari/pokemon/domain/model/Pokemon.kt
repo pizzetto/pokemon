@@ -7,5 +7,5 @@ data class Pokemon(
     val weight: Int, // 69
     val imageUrl: String?,
     val types: List<String>,
-    val speciesDescription: String
+    val speciesDescription: String?
 )

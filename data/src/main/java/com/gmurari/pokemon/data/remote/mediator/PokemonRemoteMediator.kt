@@ -8,9 +8,11 @@ import com.gmurari.pokemon.data.local.PokemonLocalService
 import com.gmurari.pokemon.data.local.entity.PokemonWithRelations
 import com.gmurari.pokemon.data.remote.PokemonRemoteService
 import com.gmurari.pokemon.data.repository.toPokemonInfoEntity
+import com.gmurari.pokemon.data.repository.toPokemonSpeciesEntity
 import com.gmurari.pokemon.data.repository.toPokemonTypeCrossRefList
 import com.gmurari.pokemon.data.repository.toPokemonTypeEntityList
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import retrofit2.HttpException
@@ -30,32 +32,10 @@ internal class PokemonRemoteMediator(
 
         return try {
 
-            val page = when(loadType) {
-                LoadType.REFRESH -> 1
-                LoadType.PREPEND -> return MediatorResult.Success(
-                    endOfPaginationReached = true
-                )
-                LoadType.APPEND -> {
-                    val lastItem = state.lastItemOrNull()
-                    if(lastItem == null) {
-                        1
-                    } else {
-                        (lastItem.pokemon.id / state.config.pageSize) + 1
-                    }
-                }
-            }
-            val offset = (page - 1) * state.config.pageSize
-
-
-            // The network load method takes an optional after=<user.id>
-            // parameter. For every page after the first, pass the last user
-            // ID to let it continue from where it left off. For REFRESH,
-            // pass null to load the first page.
-            /*val loadKey = when (loadType) {
-                LoadType.REFRESH -> null
-                // In this example, you never need to prepend, since REFRESH
-                // will always load the first page in the list. Immediately
-                // return, reporting end of pagination.
+            // I load the Id of the last item retrieved from the pokemon list table. If it's null,
+            // I start load from the beginning.
+            val lastRetrievedId = when (loadType) {
+                LoadType.REFRESH -> 0
                 LoadType.PREPEND ->
                     return MediatorResult.Success(endOfPaginationReached = true)
                 LoadType.APPEND -> {
@@ -64,19 +44,15 @@ internal class PokemonRemoteMediator(
                             endOfPaginationReached = true
                         )
 
-                    // You must explicitly check if the last item is null when
-                    // appending, since passing null to networkService is only
-                    // valid for initial load. If lastItem is null it means no
-                    // items were loaded after the initial REFRESH and there are
-                    // no more items to load.
-
                     lastItem.pokemon.id
                 }
-            }*/
+            }
 
+            // I load the pokemon list from local database to get the list of pokemon
+            // whose I need to download the info.
             val localPokemonList = pokemonLocalService.getPokemonList(
                 searchString,
-                offset,
+                lastRetrievedId,
                 limit = state.config.pageSize
             ).first()
 
@@ -92,7 +68,26 @@ internal class PokemonRemoteMediator(
                     }
                 }
 
-                deferredPokemonInfos.forEach { deferred ->
+                deferredPokemonInfos
+                    .awaitAll()
+                    .onEach {
+                        pokemonLocalService.storePokemonInfo(
+                            it.toPokemonInfoEntity(),
+                            it.toPokemonTypeEntityList(),
+                            it.toPokemonTypeCrossRefList()
+                        )
+                    }
+                    .map { it.species.name }
+                    .distinct()
+                    .map { specieName ->
+                        async { pokemonRemoteService.getPokemonSpecie(specieName) }
+                    }
+                    .awaitAll()
+                    .forEach {
+                        pokemonLocalService.storePokemonSpecies(it.toPokemonSpeciesEntity())
+                    }
+
+                /*deferredPokemonInfos.forEach { deferred ->
                     val pokemonInfoDto = deferred.await()
 
                     pokemonLocalService.storePokemonInfo(
@@ -100,11 +95,11 @@ internal class PokemonRemoteMediator(
                         pokemonInfoDto.toPokemonTypeEntityList(),
                         pokemonInfoDto.toPokemonTypeCrossRefList()
                     )
-                }
+                }*/
             }
 
             MediatorResult.Success(
-                endOfPaginationReached = localPokemonList.size < state.config.pageSize
+                endOfPaginationReached = localPokemonList.isEmpty()
             )
         } catch (e: IOException) {
             MediatorResult.Error(e)
@@ -112,9 +107,4 @@ internal class PokemonRemoteMediator(
             MediatorResult.Error(e)
         }
     }
-
-    override suspend fun initialize(): InitializeAction {
-        return super.initialize()
-    }
-
 }
