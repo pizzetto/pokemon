@@ -1,27 +1,19 @@
 package com.gmurari.pokemon.presentation.home
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gmurari.pokemon.domain.model.Pokemon
 import com.gmurari.pokemon.domain.usecase.GetPokemonListUseCase
 import com.gmurari.pokemon.presentation.home.event.HomeUiEvent
 import com.gmurari.pokemon.presentation.home.state.HomeUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,19 +26,6 @@ class HomeViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(HomeUiState())
     val state = _state.asStateFlow()
-
-    /*private fun getPokemonListFlow(search: String): Flow<List<Pokemon>> = flow {
-        getPokemonListUseCase(search, limit = 20, offset = currentOffset)
-    }*/
-    /*init {
-        viewModelScope.launch {
-            getPokemonListUseCase("", 20, 0).collect { pokemonList ->
-                _state.value = _state.value.copy(
-                    pokemonList = pokemonList
-                )
-            }
-        }
-    }*/
 
     init {
         viewModelScope.launch {

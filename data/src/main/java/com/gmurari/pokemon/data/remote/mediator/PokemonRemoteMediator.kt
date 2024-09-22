@@ -86,16 +86,6 @@ internal class PokemonRemoteMediator(
                     .forEach {
                         pokemonLocalService.storePokemonSpecies(it.toPokemonSpeciesEntity())
                     }
-
-                /*deferredPokemonInfos.forEach { deferred ->
-                    val pokemonInfoDto = deferred.await()
-
-                    pokemonLocalService.storePokemonInfo(
-                        pokemonInfoDto.toPokemonInfoEntity(),
-                        pokemonInfoDto.toPokemonTypeEntityList(),
-                        pokemonInfoDto.toPokemonTypeCrossRefList()
-                    )
-                }*/
             }
 
             MediatorResult.Success(

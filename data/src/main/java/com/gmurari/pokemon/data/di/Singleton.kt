@@ -4,12 +4,12 @@ import com.gmurari.pokemon.data.local.PokemonLocalService
 import com.gmurari.pokemon.data.local.impl.PokemonLocalServiceImpl
 import com.gmurari.pokemon.data.remote.PokemonRemoteService
 import com.gmurari.pokemon.data.remote.impl.PokemonRemoteServiceImpl
+import com.gmurari.pokemon.data.repository.PokemonRepositoryImpl
+import com.gmurari.pokemon.domain.repository.PokemonRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import com.gmurari.pokemon.domain.repository.PokemonRepository
-import com.gmurari.pokemon.data.repository.PokemonRepositoryImpl
 import javax.inject.Singleton
 
 /**

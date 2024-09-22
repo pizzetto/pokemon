@@ -33,9 +33,6 @@ internal class PokemonLocalServiceImpl @Inject constructor(
     ): Flow<List<PokemonListItemEntity>> =
         pokemonDatabase.dao.getPokemonList(search, lastRetrievedId, limit)
 
-    override fun getPokemon(id: Int): Flow<PokemonWithRelations> =
-        pokemonDatabase.dao.getPokemon(id)
-
     override suspend fun storePokemonInfo(
         pokemonInfoEntity: PokemonInfoEntity,
         pokemonTypeEntities: List<PokemonTypeEntity>,

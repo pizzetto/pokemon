@@ -69,10 +69,6 @@ internal interface PokemonDao {
     )
     fun getPokemonList(search: String, lastRetrievedId: Int, limit: Int): Flow<List<PokemonListItemEntity>>
 
-    @Transaction
-    @Query("SELECT * FROM pokemon_info WHERE id = :id")
-    fun getPokemon(id: Int): Flow<PokemonWithRelations>
-
     @Query("DELETE FROM pokemon_list")
     fun clearPokemonList()
 

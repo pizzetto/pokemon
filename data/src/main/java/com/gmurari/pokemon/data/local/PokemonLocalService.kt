@@ -15,8 +15,6 @@ internal interface PokemonLocalService {
 
     fun getPokemonList(search: String, lastRetrievedId: Int, limit: Int): Flow<List<PokemonListItemEntity>>
 
-    fun getPokemon(id: Int): Flow<PokemonWithRelations>
-
     suspend fun storePokemonInfo(pokemonInfoEntity: PokemonInfoEntity,
                                  pokemonTypeEntities: List<PokemonTypeEntity>,
                                  pokemonTypeCrossRefEntities: List<PokemonTypeCrossRef>)

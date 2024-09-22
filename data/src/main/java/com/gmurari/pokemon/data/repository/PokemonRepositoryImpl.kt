@@ -4,7 +4,6 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import androidx.paging.map
 import com.gmurari.pokemon.data.local.PokemonLocalService
 import com.gmurari.pokemon.data.remote.PokemonRemoteService
@@ -15,6 +14,7 @@ import com.gmurari.pokemon.domain.repository.AsyncOp
 import com.gmurari.pokemon.domain.repository.PokemonRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -40,16 +40,7 @@ internal class PokemonRepositoryImpl @Inject constructor(
             }
         }
 
-    /**
-     * Download the list of Pokemon from the API and save it to the database.
-     *
-     * It can be refactored further to separate the download from the saving to the database,
-     * to improve the maintainability and testability of the code.
-     *
-     * I chosen to download all pokemon first, to enable the user to search for a part of the name or
-     * part of type name. I know it's slow and not ideal.
-     * Otherwise i would have used a RemoteMediator to download the pokemon as they are scrolled
-     */
+
     override fun downloadAllPokemonData(): Flow<AsyncOp<Unit>> = flow {
         try {
             emit(AsyncOp.Loading(true, 0.0))
@@ -68,19 +59,29 @@ internal class PokemonRepositoryImpl @Inject constructor(
                     }
                 }
 
-                deferredPokemonInfos.forEach { deferred ->
-                    val pokemonInfoDto = deferred.await()
+                deferredPokemonInfos
+                    .awaitAll()
+                    .onEach {
+                        pokemonLocalService.storePokemonInfo(
+                            it.toPokemonInfoEntity(),
+                            it.toPokemonTypeEntityList(),
+                            it.toPokemonTypeCrossRefList()
+                        )
+                        downloadedPokemons++
 
-                    pokemonLocalService.storePokemonInfo(
-                        pokemonInfoDto.toPokemonInfoEntity(),
-                        pokemonInfoDto.toPokemonTypeEntityList(),
-                        pokemonInfoDto.toPokemonTypeCrossRefList()
-                    )
-                    downloadedPokemons++
+                        val currentProgress = downloadedPokemons percentOf totalPokemons
+                        emit(AsyncOp.Loading<Unit>(true, currentProgress))
+                    }
+                    .map { it.species.name }
+                    .distinct()
+                    .map { specieName ->
+                        async { pokemonRemoteService.getPokemonSpecie(specieName) }
+                    }
+                    .awaitAll()
+                    .forEach {
+                        pokemonLocalService.storePokemonSpecies(it.toPokemonSpeciesEntity())
+                    }
 
-                    val currentProgress = downloadedPokemons percentOf totalPokemons
-                    emit(AsyncOp.Loading<Unit>(true, currentProgress))
-                }
                 emit(AsyncOp.Success(Unit))
             }
         } catch (e: Exception) {
