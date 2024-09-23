@@ -42,8 +42,15 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.kotlin.test.junit)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.core)
+    androidTestImplementation(libs.androidx.runner)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.kotlin.test.junit)
+    implementation(libs.androidx.core.testing)
 
     // Dagger hilt
     implementation(libs.hilt.android)
@@ -69,7 +76,15 @@ dependencies {
     // Kotlin Extensions and Coroutines support for Room
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.paging)
+    androidTestImplementation(libs.androidx.room.testing)
 
     // Paging
     implementation(libs.androidx.paging.runtime)
+
+    // Mockito
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.inline)
+
+    // Turbine
+    testImplementation(libs.turbine)
 }
